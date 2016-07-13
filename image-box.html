@@ -1,0 +1,151 @@
+<link rel='import' href='../iron-image/iron-image.html'>
+<link rel='import' href='../polymer/polymer.html'>
+
+<!--
+`image-box`
+
+
+@demo demo/index.html
+-->
+
+<dom-module id='image-box'>
+
+  <template>
+
+    <style>
+      :host {
+        display: inline-block;
+        position: relative;
+      }
+
+      #selection {
+        width: calc(100% - 4px);
+        height: calc(40% - 4px);
+        border: 2px solid white;
+        position: absolute;
+        top: 0px;
+      }
+
+      #topShade, #bottomShade {
+        position: absolute;
+        width: 100%;
+        background-color: rgba(0,0,0,0.6);
+      }
+
+      #topShade {
+        top: 0px;
+      }
+
+      #bottomShade {
+        bottom: 4px;
+      }
+
+      iron-image {
+        --iron-image-height: 100%;
+        --iron-image-width: 100%;
+      }
+    </style>
+
+    <iron-image id='img' width='100%' height='100%' src='[[src]]'></iron-image>
+
+    <div id='topShade'></div>
+    <div id='selection' on-track='_handleTrack'></div>
+    <div id='bottomShade'></div>
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'image-box',
+
+      properties: {
+        position: {
+          type: String,
+          value: '0% 0%',
+          notify: true,
+          readOnly: true
+        },
+        src: {
+          type: String,
+          observer: '_srcChanged'
+        },
+        _effectiveHeight: {
+          type: Number,
+          value: 40,
+          observer: '_effectiveHeightChanged'
+        },
+        _x: {
+          type: Number,
+          value: 0
+        },
+        _y: {
+          type: Number,
+          value: 0
+        }
+      },
+
+      _animate: function(dx, dy, target) {
+        var maxX = (this.$.img.offsetWidth - this.$.selection.offsetWidth);
+        var maxY = (this.$.img.offsetHeight - this.$.selection.offsetHeight);
+
+        var x = this._x + dx;
+        var y = this._y + dy;
+
+        x = x < 0 ? 0 : x;
+        y = y < 0 ? 0 : y;
+
+        x = x > maxX ? maxX : x;
+        y = y > maxY ? maxY : y;
+
+        this.transform('translate(' + x + 'px, ' + y + 'px)', target);
+        this.$.bottomShade.style.height = 'calc(' + this.$.img.offsetHeight + 'px - ' + this.$.selection.offsetHeight + 'px - ' + y + 'px)';
+        this.$.topShade.style.height = 'calc(' + y + 'px)';
+      },
+
+      _effectiveHeightChanged: function(effective) {
+        this.$.selection.style.height = 'calc(' + effective + '% - 4px)';
+        this.$.bottomShade.style.height = 'calc(' + this.$.img.offsetHeight + 'px - ' + this.$.selection.offsetHeight + 'px)';
+      },
+
+      _handleTrack: function(e) {
+        switch (event.detail.state) {
+          case 'track':
+            this._animate(event.detail.dx, event.detail.dy, event.currentTarget);
+            break;
+          case 'end':
+            this._updatePosition(event.detail.dx, event.detail.dy);
+            break;
+        }
+      },
+
+      _srcChanged: function(src) {
+        if (src !== '') {
+          var ctx = this;
+          var img = new Image();
+          img.onload = function() {
+            ctx.set('_effectiveHeight', Math.round(400 * (img.width / img.height)) / 10);
+          }
+          img.src = src;
+        }
+      },
+
+      _updatePosition: function(dx, dy) {
+        var maxX = (this.$.img.offsetWidth - this.$.selection.offsetWidth);
+        var maxY = (this.$.img.offsetHeight - this.$.selection.offsetHeight);
+
+        this.set('_x', Math.min(Math.max(this._x + dx, 0), maxX));
+        this.set('_y', Math.min(Math.max(this._y + dy, 0), maxY));
+
+        var xpos = maxX > 0 ? Math.max(Math.min(Math.round(1000 * this._x / maxX) / 10, 100), 0) : 0;
+        var ypos = maxY > 0 ? Math.max(Math.min(Math.round(1000 * this._y / maxY) / 10, 100), 0) : 0;
+
+        this._setPosition('' + xpos + '% ' + ypos + '%');
+      }
+
+    });
+
+  </script>
+
+</dom-module>

@@ -1,1 +1,1 @@
-# image-box
+# \<image-box\>
