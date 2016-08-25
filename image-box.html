@@ -86,6 +86,11 @@
         }
       },
 
+      reset: function() {
+        this._animate(this._x * -1, this._y * -1, this.$.selection);
+        this._updatePosition(this._x * -1, this._y * -1);
+      },
+
       _animate: function(dx, dy, target) {
         var maxX = (this.$.img.offsetWidth - this.$.selection.offsetWidth);
         var maxY = (this.$.img.offsetHeight - this.$.selection.offsetHeight);
@@ -107,6 +112,7 @@
       _effectiveHeightChanged: function(effective) {
         this.$.selection.style.height = 'calc(' + effective + '% - 4px)';
         this.$.bottomShade.style.height = 'calc(' + this.$.img.offsetHeight + 'px - ' + this.$.selection.offsetHeight + 'px)';
+        this.$.topShade.style.height = '0px';
       },
 
       _handleTrack: function(e) {

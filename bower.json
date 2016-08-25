@@ -1,7 +1,7 @@
 {
   "name": "image-box",
   "main": "image-box.html",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "https://github.com/toddradigan/image-box/blob/master/LICENSE",
   "repository": {
     "type": "git",
